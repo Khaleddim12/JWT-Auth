@@ -7,11 +7,9 @@ services:
       - db:/var/lib/postgresql/data
     ports:
       - 8001:5432
-    environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    container_name: postgres_db
+    env_file:
+      - .env
+    container_name: postgres_db 
 
   
   django_project:

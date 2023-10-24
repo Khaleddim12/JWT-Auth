@@ -1,13 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 import os
+from dotenv import load_dotenv
 
+dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
+load_dotenv()
 
-
-
-username = "admin"
-email = "admin@example.com"
-password = "admin"
+username = os.getenv('ADMIN_USERNAME')
+email = os.getenv('EMAIL_HOST_USER')
+password = os.getenv('ADMIN_PASSWORD')
 class Command(BaseCommand):
     help = 'Create a superuser with predefined credentials'
 
