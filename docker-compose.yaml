@@ -1,0 +1,57 @@
+services:
+
+  db:
+    restart: on-failure
+    image: postgres
+    volumes:
+      - db:/var/lib/postgresql/data
+    ports:
+      - 8001:5432
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    container_name: postgres_db
+
+  
+  django_project:
+    build: .
+    container_name: django_container
+    labels:
+      com.example.service: "web"
+      com.example.description: "Use for the main web process"
+    restart: on-failure
+    volumes:
+      - .:/django
+      - static:/django/static
+      - media:/django/media
+      - /var/log/django/access.log:/access.log
+      - /var/log/django/error.log:/error.log      
+    ports:
+      - 8000:8000
+    image: python:3.11-slim-buster
+
+    command: sh -c "python manage.py makemigrations --no-input && python manage.py migrate --no-input && python manage.py makemigrations users --no-input && python manage.py migrate users --no-input  &&  python manage.py collectstatic --no-input && python manage.py create_superuser && gunicorn auth_project.wsgi --bind 0.0.0.0:8000  --timeout 1800"
+    depends_on:
+      - db
+    
+
+  #nginx server docker image
+  nginx:
+    restart: on-failure
+    container_name: nginx
+    image: nginx:stable-alpine
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - static:/static
+      - media:/media
+    ports:
+      - 80:80
+    depends_on:
+      - django_project
+
+volumes:
+  static:
+  portainer_data:
+  media:
+  db:
