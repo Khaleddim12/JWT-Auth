@@ -60,14 +60,17 @@ class LoginAPI(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class LogoutAPI(APIView):
-    serializer_class = LogoutSerializer
-
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
+        refresh_token = request.data.get('refresh_token')
 
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        if not refresh_token:
+            return Response({'detail': 'Refresh token is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(status=status.HTTP_204_NO_CONTENT) 
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({'detail': 'Successfully logged out.'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'detail': 'Invalid refresh token.'}, status=status.HTTP_400_BAD_REQUEST) 

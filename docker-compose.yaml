@@ -9,12 +9,12 @@ services:
       - 8001:5432
     env_file:
       - .env
-    container_name: postgres_db 
+    container_name: db 
 
   
-  django_project:
+  auth_project:
     build: .
-    container_name: django_container
+    container_name: django
     labels:
       com.example.service: "web"
       com.example.description: "Use for the main web process"
@@ -46,7 +46,7 @@ services:
     ports:
       - 80:80
     depends_on:
-      - django_project
+      - auth_project
 
 volumes:
   static:
